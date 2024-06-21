@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>cursor</title>
+    <style>
+        body{
+            background-color: cadetblue;
+        }
+        .box{
+            height: 10vh;
+            width: 10vw;
+            background: #333;
+            overflow: hidden;
+            position: relative;
+        }
+        j{
+            position: absolute;
+            width: 4px;
+            height: 4px;background: radial-gradient(#0f0,#025813,#0f0);
+            border-radius: 50%;
+            pointer-events: none;
+            overflow: hidden;
+            animation: sparkles 2s linear forwards;
+        }
+        @keyframes sparkles{
+            0%{
+                opacity: 1;
+                transform: translate(0,0);
+            }
+            100%{
+                opacity: 0;
+                transform: translate(var(--x),var(--y));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="box"></div>
+    <script>
+        let box = document.querySelector('.box');
+
+        function spark(event) {
+            let j = document.createElement('j');
+            let boxRect = box.getBoundingClientRect();
+            let startX = event.pageX - boxRect.left;
+            let startY = event.pageY - boxRect.top;
+
+            j.style.left = startX + 'px';
+            j.style.top = startY + 'px';
+            j.style.scale = `${Math.random() * 2 + 1}`;
+            j.style.setProperty('--x', `${Math.random() * 400 - 200}px`);
+            j.style.setProperty('--y', `${Math.random() * 400 - 200}px`);
+
+            box.appendChild(j);
+
+            let velocityX = Math.random() * 4 - 2; // Random initial velocity X
+            let velocityY = Math.random() * 4 - 2; // Random initial velocity Y
+
+            let animationInterval = setInterval(() => {
+                let jRect = j.getBoundingClientRect();
+                let currentX = parseFloat(j.style.left);
+                let currentY = parseFloat(j.style.top);
+
+                if (jRect.left <= boxRect.left || jRect.right >= boxRect.right) {
+                    velocityX = -velocityX; // Reverse X direction
+                }
+
+                if (jRect.top <= boxRect.top || jRect.bottom >= boxRect.bottom) {
+                    velocityY = -velocityY; // Reverse Y direction
+                }
+
+                j.style.left = `${currentX + velocityX}px`;
+                j.style.top = `${currentY + velocityY}px`;
+
+                if (parseInt(j.style.left) < 0 || parseInt(j.style.left) > boxRect.width ||
+                    parseInt(j.style.top) < 0 || parseInt(j.style.top) > boxRect.height) {
+                    clearInterval(animationInterval);
+                    box.removeChild(j);
+                }
+            }, 10);
+
+            setTimeout(() => {
+                clearInterval(animationInterval);
+                box.removeChild(j);
+            }, 7000);
+        }
+
+        box.addEventListener('mousemove', spark);
+    </script>
+</body>
+</html>
